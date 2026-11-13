@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Évaluation d'un film</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#20242c;--muted:#687080;--line:#e3e6eb;--accent:#315fba;--gold:#e5a51a;--good:#176b48;--shadow:0 8px 28px rgba(24,34,52,.07)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:920px;margin:40px auto;padding:0 20px 48px}
+header{margin-bottom:24px}.eyebrow{color:var(--accent);font-size:.78rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:8px 0}
+.intro{color:var(--muted);max-width:680px;margin:12px 0 0}
+.panel,.criterion,.result{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.panel{padding:22px;margin-bottom:18px}
+label{display:block;font-weight:650;margin-bottom:7px}
+input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font:inherit;color:inherit;background:#fff}
+input[type=text]:focus,textarea:focus{outline:3px solid #edf2fc;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.criterion{padding:19px;margin-bottom:12px}
+.criterion-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.criterion h2{font-size:1.08rem;margin:0}
+.weight{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;color:var(--muted);background:#f0f2f6;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.weight-input{width:64px;border:1px solid var(--line);border-radius:6px;padding:3px 5px;font:inherit;color:var(--ink);background:#fff;text-align:right}
+.weight-input:focus{outline:2px solid #edf2fc;border-color:var(--accent)}
+.description{color:var(--muted);font-size:.92rem;margin:8px 0 14px}
+.rating-line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.stars{display:flex;gap:3px;align-items:center}
+.star{position:relative;border:0;background:transparent;padding:0;width:35px;height:42px;font-size:34px;line-height:1;color:#d8dce3;cursor:pointer;overflow:hidden}
+.star .fill{position:absolute;inset:0 auto 0 0;width:0;overflow:hidden;color:var(--gold);white-space:nowrap;pointer-events:none}
+.star .base{pointer-events:none}
+.star:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+.score{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.15rem;min-width:65px;text-align:right}
+.star-help{font-size:.78rem;color:var(--muted);margin-top:4px}
+textarea{min-height:66px;resize:vertical;margin-top:13px}
+.result{padding:24px;margin-top:20px;background:linear-gradient(135deg,#fff,#f7f9ff)}
+.result-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.result h2{margin:0;font-size:1.15rem}
+.big-score{font-size:clamp(2.5rem,7vw,4rem);line-height:1.05;font-weight:800;letter-spacing:-.04em;color:var(--good);font-variant-numeric:tabular-nums}
+.small-score{color:var(--muted);margin-top:5px}
+.overall-stars{color:var(--gold);font-size:1.55rem;letter-spacing:2px;margin-top:8px}
+.overall-half{position:relative;display:inline-block}
+.overall-half::after{content:"★";position:absolute;left:0;top:0;width:50%;overflow:hidden}
+.breakdown{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+.break-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;color:var(--muted);font-size:.9rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button.action{border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:var(--accent);color:#fff}.secondary{background:#eef0f4;color:var(--ink)}
+button.action:hover{filter:brightness(.97)}
+.note{color:var(--muted);font-size:.88rem;margin:14px 0 0}
+footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:22px}
+@media(max-width:600px){main{margin:25px auto}.grid{grid-template-columns:1fr}.panel{padding:17px}.criterion{padding:16px}.star{width:31px;font-size:30px}}
+@media print{body{background:#fff}main{margin:0;max-width:none}.panel,.criterion,.result{box-shadow:none;break-inside:avoid}.actions{display:none}textarea{border:0;padding-left:0}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">Grille de critique cinématographique</div>
+  <h1>Évaluer un film</h1>
+  <p class="intro">Attribuez une note à chacun des sept critères en cliquant sur les étoiles. Chaque critère est noté sur 10 et possède un poids différent dans le calcul final. La note globale est également convertie sur 5.</p>
+</header>
+
+<section class="panel">
+  <label for="film">Titre du film</label>
+  <input id="film" type="text" placeholder="Ex. : Pulp Fiction">
+  <div class="grid" style="margin-top:14px">
+    <div><label for="director">Réalisateur (facultatif)</label><input id="director" type="text" placeholder="Nom du réalisateur"></div>
+    <div><label for="year">Année (facultatif)</label><input id="year" type="text" inputmode="numeric" placeholder="Année de sortie"></div>
+  </div>
+</section>
+
+<div id="criteria"></div>
+
+<section class="result" aria-live="polite">
+  <div class="result-top">
+    <div>
+      <div class="eyebrow">Résultat pondéré</div>
+      <h2 id="result-title">Note globale</h2>
+      <div class="overall-stars" id="overall-stars" aria-label="Note globale en étoiles">★★☆☆☆</div>
+      <p class="note" id="weight-status">Les pondérations sont normalisées automatiquement (somme : 100 %).</p>
+    </div>
+    <div>
+      <div class="big-score"><span id="score10">5,00</span><span style="font-size:1.2rem"> / 10</span></div>
+      <div class="small-score"><strong id="score5">2,50 / 5</strong></div>
+    </div>
+  </div>
+  <div class="breakdown" id="breakdown"></div>
+  <div class="actions">
+    <button class="action primary" id="copy">Copier l'évaluation</button>
+    <button class="action secondary" id="print">Imprimer / enregistrer en PDF</button>
+    <button class="action secondary" id="reset">Réinitialiser</button>
+  </div>
+</section>
+<p class="note">Chaque étoile vaut 1 point sur 10 ; les demi-étoiles ne sont pas disponibles. Repères indicatifs : 0–2 très mauvais · 3–4 insuffisant · 5–6 correct · 7–8 très bon · 9 excellent · 10 exceptionnel.</p>
+<footer>Outil d'évaluation — les notes sont calculées dans votre navigateur.</footer>
+</main>
+<script>
+const criteria = [
+ {name:"Le genre",weight:10,desc:"Originalité et utilisation des codes du genre : fantastique, policier, western, science-fiction, etc."},
+ {name:"Les personnages",weight:15,desc:"Écriture, profondeur, crédibilité, évolution des personnages et interprétation des acteurs."},
+ {name:"Le récit",weight:15,desc:"Construction du scénario, narration, rythme, cohérence et manière de raconter l'histoire."},
+ {name:"Les scènes",weight:10,desc:"Scènes marquantes, intensité, efficacité et contribution au récit ou aux émotions."},
+ {name:"La mise en scène",weight:20,desc:"Cadrage, mouvements de caméra, lumière, couleurs, décors, montage et identité visuelle."},
+ {name:"Le son",weight:10,desc:"Musique, bruitages, dialogues, silences et ambiance sonore."},
+ {name:"Le discours",weight:20,desc:"Thèmes abordés, propos du réalisateur, profondeur et réflexions suscitées par le film."}
+];
+const values=criteria.map(()=>5);
+let weights=criteria.map(c=>c.weight);
+const weightInputs=[];
+const container=document.getElementById("criteria");
+criteria.forEach((c,i)=>{
+ const section=document.createElement("section");
+ section.className="criterion";
+ section.innerHTML=`
+  <div class="criterion-head"><h2>${c.name}</h2><label class="weight" for="weight-${i}">Poids (%)
+   <input class="weight-input" id="weight-${i}" type="number" min="0" max="100" step="any" value="${c.weight}" required aria-label="Poids pour ${c.name} en pourcentage">
+  </label></div>
+  <p class="description">${c.desc}</p>
+  <div class="rating-line">
+   <div><div class="stars" id="stars-${i}" role="group" aria-label="Note pour ${c.name}, sur 10"></div><div class="star-help">Cliquez sur une étoile pour attribuer un point.</div></div>
+   <output class="score" id="value-${i}">5 / 10</output>
+  </div>
+  <textarea id="comment-${i}" placeholder="Exemple ou justification (facultatif)..." aria-label="Commentaire pour ${c.name}"></textarea>`;
+ container.appendChild(section);
+ const weightInput=document.getElementById(`weight-${i}`);
+ weightInputs.push(weightInput);
+ weightInput.addEventListener("input",()=>{
+  if(weightInput.value!=="" && weightInput.validity.valid)weights[i]=weightInput.valueAsNumber;
+  render();
+ });
+ const stars=document.getElementById(`stars-${i}`);
+ for(let s=1;s<=10;s++){
+  const b=document.createElement("button");
+  b.type="button";b.className="star";b.setAttribute("aria-label",`${s} étoile${s>1?"s":""}`);
+  b.innerHTML='<span class="base">★</span><span class="fill">★</span>';
+  b.addEventListener("click",()=>{
+   values[i]=s;
+   render();
+  });
+  stars.appendChild(b);
+ }
+});
+function fmt(n){return n.toFixed(2).replace(".",",")}
+function calculate(){
+ const totalWeight=weights.reduce((sum,weight)=>sum+weight,0);
+ if(!weightInputs.every(input=>input.value!=="" && input.validity.valid) || totalWeight===0)return null;
+ return criteria.reduce((sum,c,i)=>sum+values[i]*weights[i]/totalWeight,0);
+}
+function render(){
+ values.forEach((v,i)=>{
+  document.getElementById(`value-${i}`).textContent=String(v).replace(".",",")+" / 10";
+  const buttons=[...document.getElementById(`stars-${i}`).children];
+  buttons.forEach((b,j)=>{
+   const fill=j<v?1:0;
+   b.querySelector(".fill").style.width=(fill*100)+"%";
+   b.setAttribute("aria-pressed",fill>0?"true":"false");
+  });
+ });
+ const total=calculate();
+ const totalWeight=weights.reduce((sum,weight)=>sum+weight,0);
+ document.getElementById("weight-status").textContent=weightInputs.some(input=>input.value==="" || !input.validity.valid)
+  ?"Saisissez un poids compris entre 0 et 100 % pour chaque critère."
+  :totalWeight===0
+   ?"La somme des poids doit être supérieure à 0 pour calculer la note."
+   :`Pondérations normalisées automatiquement (somme : ${fmt(totalWeight)} %).`;
+ document.getElementById("score10").textContent=total===null?"—":fmt(total);
+ document.getElementById("score5").textContent=total===null?"— / 5":fmt(total/2)+" / 5";
+ const fullStars=total===null?0:Math.floor(total/2);
+ const halfStar=total!==null && total/2%1>=.5;
+ document.getElementById("overall-stars").innerHTML="★".repeat(fullStars)+(halfStar?'<span class="overall-half">☆</span>':"")+"☆".repeat(5-fullStars-(halfStar?1:0));
+ document.getElementById("overall-stars").setAttribute("aria-label",total===null?"Note globale indisponible":"Note globale sur 5 : "+fmt(total/2));
+ document.getElementById("result-title").textContent=document.getElementById("film").value.trim()||"Note globale";
+ document.getElementById("breakdown").innerHTML=criteria.map((c,i)=>{
+  const contribution=total===null?null:values[i]*weights[i]/totalWeight;
+  return `<div class="break-row"><span>${c.name} · ${fmt(weights[i])} %</span><strong>${contribution===null?"—":fmt(contribution)} point${contribution!==null && contribution>1?"s":""}</strong></div>`;
+ }).join("");
+}
+document.getElementById("film").addEventListener("input",render);
+document.getElementById("copy").addEventListener("click",async()=>{
+ const total=calculate();
+ if(total===null){alert("Vérifiez les poids et assurez-vous que leur somme est supérieure à 0 avant de copier l'évaluation.");return}
+ const film=document.getElementById("film").value.trim()||"Film non renseigné";
+ const director=document.getElementById("director").value.trim(),year=document.getElementById("year").value.trim();
+ const lines=[`Évaluation : ${film}`,director?`Réalisateur : ${director}`:"",year?`Année : ${year}`:"","",...criteria.map((c,i)=>`${c.name} : ${String(values[i]).replace(".",",")}/10 (${fmt(weights[i])} %)${document.getElementById(`comment-${i}`).value.trim()?" — "+document.getElementById(`comment-${i}`).value.trim():""}`),"",`Note finale : ${fmt(total)}/10`,`Note sur 5 : ${fmt(total/2)}/5`].filter(Boolean);
+ try{await navigator.clipboard.writeText(lines.join("\n"));const b=document.getElementById("copy");b.textContent="Évaluation copiée !";setTimeout(()=>b.textContent="Copier l'évaluation",1800)}
+ catch(e){alert("La copie automatique n'est pas disponible dans ce navigateur. Utilisez l'impression ou sélectionnez le texte manuellement.")}
+});
+document.getElementById("print").addEventListener("click",()=>window.print());
+document.getElementById("reset").addEventListener("click",()=>{
+ if(!confirm("Réinitialiser toutes les notes, les poids, les commentaires et les informations du film ?"))return;
+ values.fill(5);
+ weights=criteria.map(c=>c.weight);
+ weightInputs.forEach((input,i)=>input.value=String(criteria[i].weight));
+ criteria.forEach((c,i)=>{document.getElementById(`comment-${i}`).value=""});
+ ["film","director","year"].forEach(id=>document.getElementById(id).value="");
+ render();
+});
+render();
+</script>
+</body>
+</html>
